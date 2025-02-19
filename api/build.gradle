@@ -14,63 +14,39 @@ repositories {
 }
 
 dependencies {
-    annotationProcessor("io.micronaut.data:micronaut-data-processor")
     annotationProcessor("io.micronaut:micronaut-http-validation")
-    annotationProcessor("io.micronaut.security:micronaut-security-annotations")
     annotationProcessor("io.micronaut.serde:micronaut-serde-processor")
-    implementation("io.micronaut:micronaut-http-client")
-    implementation("io.micronaut:micronaut-management")
+
+    // Database
+    implementation("io.micronaut.sql:micronaut-jdbc-hikari")
     implementation("io.micronaut.data:micronaut-data-jdbc")
+    implementation("org.postgresql:postgresql:42.7.2")
+
+    // Flyway
+    implementation("io.micronaut.flyway:micronaut-flyway")
+    implementation("org.flywaydb:flyway-database-postgresql:10.18.2")
+    runtimeOnly("org.flywaydb:flyway-mysql")
+
+    // Security
     implementation("io.micronaut.security:micronaut-security-jwt")
     implementation("io.micronaut.security:micronaut-security-oauth2")
-    implementation("io.micronaut.serde:micronaut-serde-jackson")
-    implementation("io.micronaut.sql:micronaut-jdbc-hikari")
-    runtimeOnly("ch.qos.logback:logback-classic")
-    runtimeOnly("org.postgresql:postgresql")
-    aotPlugins platform("io.micronaut.platform:micronaut-platform:4.4.2")
-    aotPlugins("io.micronaut.security:micronaut-security-aot")
-}
 
+    runtimeOnly("ch.qos.logback:logback-classic")
+}
 
 application {
-    mainClass = "com.dogial.Application"
+    mainClass.set("com.dogial.Application")
 }
+
 java {
-    sourceCompatibility = JavaVersion.toVersion("17")
-    targetCompatibility = JavaVersion.toVersion("17")
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
 }
 
-
-tasks {
-    jib {
-        to {
-            image = "gcr.io/myapp/jib-image"
-        }
-    }
-}
-graalvmNative.toolchainDetection = false
 micronaut {
-    runtime("netty")
-    testRuntime("junit5")
+    version("4.2.1")
     processing {
         incremental(true)
         annotations("com.dogial.*")
     }
-    aot {
-    // Please review carefully the optimizations enabled below
-    // Check https://micronaut-projects.github.io/micronaut-aot/latest/guide/ for more details
-        optimizeServiceLoading = false
-        convertYamlToJava = false
-        precomputeOperations = true
-        cacheEnvironment = true
-        optimizeClassLoading = true
-        deduceEnvironment = true
-        optimizeNetty = true
-        replaceLogbackXml = true
-        configurationProperties.put("micronaut.security.jwks.enabled","false")
-        configurationProperties.put("micronaut.security.openid-configuration.enabled","false")
-    }
 }
-
-
-
