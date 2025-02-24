@@ -1,4 +1,4 @@
-package com.dogial;
+package com;
 
 import io.micronaut.core.annotation.NonNull;
 import io.micronaut.context.ApplicationContextBuilder;
