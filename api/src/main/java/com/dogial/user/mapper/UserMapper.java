@@ -1,8 +1,8 @@
-package com.user.mapper;
+package com.dogial.user.mapper;
 
-import com.user.controller.model.UserRequest;
-import com.user.controller.model.UserResponse;
-import com.user.persistence.entities.UserEntity;
+import com.dogial.user.controller.model.UserRequest;
+import com.dogial.user.controller.model.UserResponse;
+import com.dogial.user.persistence.entities.UserEntity;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 

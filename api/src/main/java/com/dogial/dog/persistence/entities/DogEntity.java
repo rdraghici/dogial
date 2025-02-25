@@ -1,11 +1,9 @@
-package com.dog.persistence.entities;
+package com.dogial.dog.persistence.entities;
 
-import com.user.persistence.entities.UserEntity;
+import com.dogial.user.persistence.entities.UserEntity;
 import io.micronaut.core.annotation.Introspected;
-import io.micronaut.data.annotation.GeneratedValue;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.GenericGenerator;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -21,9 +19,8 @@ import java.util.UUID;
 @Table(name = "dogs")
 public class DogEntity {
 
-    @GeneratedValue(value = GeneratedValue.Type.UUID)
-    @GenericGenerator(name = "uuid2", strategy = "uuid2")
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id", columnDefinition = "uuid")
     private UUID id;
 

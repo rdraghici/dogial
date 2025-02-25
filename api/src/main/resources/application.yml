@@ -1,0 +1,38 @@
+micronaut:
+  application:
+    name: dogial
+  server:
+    port: 8080
+  security:
+    enabled: false
+
+datasources:
+  default:
+    url: jdbc:postgresql://localhost:5432/dogial_dev
+    username: postgres
+    password: postgres
+    driverClassName: org.postgresql.Driver
+
+jpa:
+  default:
+    packages-to-scan:
+      - 'com.dogial.user.persistence.entities'
+      - 'com.dogial.dog.persistence.entities'
+    properties:
+      hibernate:
+        hbm2ddl:
+          auto: none
+        show_sql: true
+        transaction:
+          jta:
+            platform: io.micronaut.transaction.hibernate.MicronautJtaPlatform
+        current_session_context_class: jta
+
+flyway:
+  enabled: true
+  datasources:
+    default:
+      enabled: true
+      schemas: public
+      baseline-on-migrate: true
+      validate-on-migrate: true

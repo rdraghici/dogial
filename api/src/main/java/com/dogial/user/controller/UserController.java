@@ -1,8 +1,8 @@
-package com.user.controller;
+package com.dogial.user.controller;
 
-import com.user.controller.model.UserRequest;
-import com.user.controller.model.UserResponse;
-import com.user.service.UserService;
+import com.dogial.user.controller.model.UserRequest;
+import com.dogial.user.controller.model.UserResponse;
+import com.dogial.user.service.UserService;
 import io.micronaut.http.HttpResponse;
 import io.micronaut.http.annotation.*;
 import io.micronaut.security.annotation.Secured;

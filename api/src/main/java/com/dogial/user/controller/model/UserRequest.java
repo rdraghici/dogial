@@ -1,4 +1,4 @@
-package com.user.controller.model;
+package com.dogial.user.controller.model;
 
 import io.micronaut.serde.annotation.Serdeable;
 

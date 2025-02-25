@@ -1,8 +1,6 @@
-package com.user.persistence.dao;
+package com.dogial.user.persistence.dao;
 
-import com.user.persistence.entities.UserEntity;
-import io.micronaut.tracing.annotation.NewSpan;
-import io.micronaut.transaction.annotation.ReadOnly;
+import com.dogial.user.persistence.entities.UserEntity;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import jakarta.persistence.EntityManager;
@@ -26,8 +24,6 @@ public class UserDao {
         this.entityManager = entityManager;
     }
 
-    @NewSpan("findByEmail")
-    @ReadOnly
     @Transactional
     public Optional<UserEntity> findByEmail(String email) {
         final Query query = entityManager.createQuery(
@@ -36,8 +32,6 @@ public class UserDao {
         return query.getResultList().stream().findFirst();
     }
 
-    @NewSpan("existsByEmail")
-    @ReadOnly
     @Transactional
     public boolean existsByEmail(String email) {
         final Query query = entityManager.createQuery(
@@ -46,8 +40,6 @@ public class UserDao {
         return ((Long) query.getSingleResult()) > 0;
     }
 
-    @NewSpan("findByEmailAndPasswordHash")
-    @ReadOnly
     @Transactional
     public Optional<UserEntity> findByEmailAndPasswordHash(String email, String passwordHash) {
         final Query query = entityManager.createQuery(
@@ -58,8 +50,6 @@ public class UserDao {
         return query.getResultList().stream().findFirst();
     }
 
-    @NewSpan("countByCreatedAtBetween")
-    @ReadOnly
     @Transactional
     public long countByCreatedAtBetween(Instant startDate, Instant endDate) {
         final Query query = entityManager.createQuery(
@@ -69,8 +59,6 @@ public class UserDao {
         return (Long) query.getSingleResult();
     }
 
-    @NewSpan("findByCreatedAtBetween")
-    @ReadOnly
     @Transactional
     public List<UserEntity> findByCreatedAtBetween(Instant startDate, Instant endDate) {
         final Query query = entityManager.createQuery(
@@ -99,15 +87,11 @@ public class UserDao {
         entityManager.clear();
     }
 
-    @NewSpan("findById")
-    @ReadOnly
     @Transactional
     public Optional<UserEntity> findById(UUID id) {
         return Optional.ofNullable(entityManager.find(UserEntity.class, id));
     }
 
-    @NewSpan("existsById")
-    @ReadOnly
     @Transactional
     public boolean existsById(UUID id) {
         final Query query = entityManager.createQuery(
