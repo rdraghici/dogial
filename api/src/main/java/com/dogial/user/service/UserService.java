@@ -32,39 +32,29 @@ public class UserService {
 
     @Transactional
     public HttpResponse<UserResponse> createUser(UserRequest userRequest) {
-        try {
-            if (userDao.existsByEmail(userRequest.email())) {
-                log.error("User with email {} already exists", userRequest.email());
-                throw new HttpStatusException(HttpStatus.BAD_REQUEST, "User already exists");
-            }
-            UserEntity userEntity = userMapper.toEntity(userRequest);
-            UserEntity savedUser = userDao.save(userEntity);
-            UserResponse userResponse = userMapper.toResponse(savedUser);
-            return HttpResponse.created(userResponse);
-        } catch (Exception e) {
-            log.error("Error creating user: {}", e.getMessage(), e);
-            throw new UserServiceException("Error creating user", e);
+        if (userDao.existsByEmail(userRequest.email())) {
+            log.error("User with email {} already exists", userRequest.email());
+            throw new HttpStatusException(HttpStatus.BAD_REQUEST, "User already exists");
         }
+        UserEntity userEntity = userMapper.toEntity(userRequest);
+        UserEntity savedUser = userDao.save(userEntity);
+        UserResponse userResponse = userMapper.toResponse(savedUser);
+        return HttpResponse.created(userResponse);
     }
 
     @Transactional
     public HttpResponse<UserResponse> updateUser(UUID id, UserRequest userRequest) {
-        try {
-            Optional<UserEntity> existingUser = userDao.findById(id);
-            if (existingUser.isPresent()) {
-                UserEntity userEntity = existingUser.get();
-                userEntity.setEmail(userRequest.email());
-                userEntity.setPasswordHash(userRequest.passwordHash());
-                userDao.update(userEntity);
-                UserResponse userResponse = userMapper.toResponse(userEntity);
-                return HttpResponse.ok(userResponse);
-            } else {
-                log.error("User with ID {} does not exist", id);
-                throw new HttpStatusException(HttpStatus.NOT_FOUND, "User does not exist");
-            }
-        } catch (Exception e) {
-            log.error("Error updating user with ID {}: {}", id, e.getMessage(), e);
-            throw new UserServiceException("Error updating user", e);
+        Optional<UserEntity> existingUser = userDao.findById(id);
+        if (existingUser.isPresent()) {
+            UserEntity userEntity = existingUser.get();
+            userEntity.setEmail(userRequest.email());
+            userEntity.setPasswordHash(userRequest.passwordHash());
+            userDao.update(userEntity);
+            UserResponse userResponse = userMapper.toResponse(userEntity);
+            return HttpResponse.ok(userResponse);
+        } else {
+            log.error("User with ID {} does not exist", id);
+            throw new HttpStatusException(HttpStatus.NOT_FOUND, "User does not exist");
         }
     }
 
@@ -82,13 +72,12 @@ public class UserService {
 
     @Transactional
     public HttpResponse<UserResponse> getUser(UUID id) {
-        try {
-            Optional<UserEntity> user = userDao.findById(id);
-            return user.map(userEntity -> HttpResponse.ok(userMapper.toResponse(userEntity)))
-                    .orElseGet(HttpResponse::notFound);
-        } catch (Exception e) {
-            log.error("Error retrieving user with ID {}: {}", id, e.getMessage(), e);
-            throw new UserServiceException("Error retrieving user", e);
+        Optional<UserEntity> user = userDao.findById(id);
+        if (user.isPresent()) {
+            return HttpResponse.ok(userMapper.toResponse(user.get()));
+        } else {
+            log.error("User with ID {} does not exist", id);
+            throw new HttpStatusException(HttpStatus.NOT_FOUND, "User does not exist");
         }
     }
 }

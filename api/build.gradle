@@ -76,6 +76,9 @@ dependencies {
     // Mockito
     testImplementation("org.mockito:mockito-core:5.5.0")
     testImplementation("org.mockito:mockito-junit-jupiter:5.5.0")
+
+    // Micronaut HTTP client
+    implementation("io.micronaut:micronaut-http-client")
 }
 
 configurations.all {
