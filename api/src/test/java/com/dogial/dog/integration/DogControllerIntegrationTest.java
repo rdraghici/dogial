@@ -22,6 +22,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -59,8 +60,10 @@ class DogControllerIntegrationTest extends IntegrationTestBase {
     @Test
     void testCreateDog_returnsSuccess() {
         UUID ownerId = UUID.randomUUID();
+
         DogRequest dogRequest = new DogRequest(ownerId, "Buddy", "Labrador", "Male",
                 new BigDecimal("30.5"), "2 years", true, "Friendly", true);
+
         DogEntity dogEntity = DogEntity.builder()
                 .id(UUID.randomUUID())
                 .owner(UserEntity.builder().id(ownerId).build())
@@ -73,10 +76,13 @@ class DogControllerIntegrationTest extends IntegrationTestBase {
                 .behavior(dogRequest.behavior())
                 .pedigree(dogRequest.pedigree())
                 .build();
+
         when(userDao.findById(any())).thenReturn(Optional.of(UserEntity.builder().id(ownerId).build()));
         when(dogDao.save(any())).thenReturn(dogEntity);
 
-        MutableHttpRequest<DogRequest> request = POST(SERVICE_PATH, dogRequest);
+        MutableHttpRequest<DogRequest> request = POST(SERVICE_PATH, dogRequest)
+                .header("Authorization", bearerAuth(TEST_EMAIL, List.of("ROLE_USER")));
+
         HttpResponse<DogResponse> response = client.toBlocking().exchange(request, Argument.of(DogResponse.class));
 
         assertNotNull(response);
@@ -89,8 +95,10 @@ class DogControllerIntegrationTest extends IntegrationTestBase {
     void testUpdateDog_returnsSuccess() {
         UUID dogId = UUID.randomUUID();
         UUID ownerId = UUID.randomUUID();
+
         DogRequest dogRequest = new DogRequest(ownerId, "Buddy", "Labrador", "Male",
                 new BigDecimal("30.5"), "2 years", true, "Friendly", true);
+
         DogEntity dogEntity = DogEntity.builder()
                 .id(dogId)
                 .owner(UserEntity.builder().id(ownerId).build())
@@ -103,11 +111,14 @@ class DogControllerIntegrationTest extends IntegrationTestBase {
                 .behavior(dogRequest.behavior())
                 .pedigree(dogRequest.pedigree())
                 .build();
+
         when(dogDao.findById(any())).thenReturn(Optional.of(dogEntity));
         when(userDao.findById(any())).thenReturn(Optional.of(UserEntity.builder().id(ownerId).build()));
         when(dogDao.update(any())).thenReturn(dogEntity);
 
-        MutableHttpRequest<DogRequest> request = HttpRequest.PUT(SERVICE_PATH + "/" + dogId, dogRequest);
+        MutableHttpRequest<DogRequest> request = HttpRequest.PUT(SERVICE_PATH + "/" + dogId, dogRequest)
+                .header("Authorization", bearerAuth(TEST_EMAIL, List.of("ROLE_USER")));
+
         HttpResponse<DogResponse> response = client.toBlocking().exchange(request, Argument.of(DogResponse.class));
 
         assertNotNull(response);
@@ -120,10 +131,13 @@ class DogControllerIntegrationTest extends IntegrationTestBase {
     void testDeleteDog_returnsSuccess() {
         UUID dogId = UUID.randomUUID();
         DogEntity dogEntity = DogEntity.builder().id(dogId).build();
+
         when(dogDao.findById(any())).thenReturn(Optional.of(dogEntity));
         doNothing().when(dogDao).delete(any());
 
-        MutableHttpRequest<Object> request = HttpRequest.DELETE(SERVICE_PATH + "/" + dogId);
+        MutableHttpRequest<Object> request = HttpRequest.DELETE(SERVICE_PATH + "/" + dogId)
+                .header("Authorization", bearerAuth(TEST_EMAIL, List.of("ROLE_USER")));
+
         HttpResponse<Void> response = client.toBlocking().exchange(request, Argument.VOID);
 
         assertNotNull(response);
@@ -133,6 +147,7 @@ class DogControllerIntegrationTest extends IntegrationTestBase {
     @Test
     void testGetDog_returnsSuccess() {
         UUID dogId = UUID.randomUUID();
+
         DogEntity dogEntity = DogEntity.builder()
                 .id(dogId)
                 .name("Buddy")
@@ -144,9 +159,12 @@ class DogControllerIntegrationTest extends IntegrationTestBase {
                 .behavior("Friendly")
                 .pedigree(true)
                 .build();
+
         when(dogDao.findById(any())).thenReturn(Optional.of(dogEntity));
 
-        MutableHttpRequest<Object> request = HttpRequest.GET(SERVICE_PATH + "/" + dogId);
+        MutableHttpRequest<Object> request = HttpRequest.GET(SERVICE_PATH + "/" + dogId)
+                .header("Authorization", bearerAuth(TEST_EMAIL, List.of("ROLE_USER")));
+
         HttpResponse<DogResponse> response = client.toBlocking().exchange(request, Argument.of(DogResponse.class));
 
         assertNotNull(response);
@@ -159,11 +177,15 @@ class DogControllerIntegrationTest extends IntegrationTestBase {
     void testUpdateDog_returnsNotFound() {
         UUID dogId = UUID.randomUUID();
         UUID ownerId = UUID.randomUUID();
+
         DogRequest dogRequest = new DogRequest(ownerId, "Buddy", "Labrador", "Male",
                 new BigDecimal("30.5"), "2 years", true, "Friendly", true);
+
         when(dogDao.findById(any())).thenReturn(Optional.empty());
 
-        MutableHttpRequest<DogRequest> request = HttpRequest.PUT(SERVICE_PATH + "/" + dogId, dogRequest);
+        MutableHttpRequest<DogRequest> request = HttpRequest.PUT(SERVICE_PATH + "/" + dogId, dogRequest)
+                .header("Authorization", bearerAuth(TEST_EMAIL, List.of("ROLE_USER")));
+
         HttpClientResponseException exception = assertThrows(HttpClientResponseException.class, () -> {
             client.toBlocking().exchange(request, Argument.of(DogResponse.class));
         });
@@ -174,9 +196,12 @@ class DogControllerIntegrationTest extends IntegrationTestBase {
     @Test
     void testDeleteDog_returnsNotFound() {
         UUID dogId = UUID.randomUUID();
+
         when(dogDao.findById(any())).thenReturn(Optional.empty());
 
-        MutableHttpRequest<Object> request = HttpRequest.DELETE(SERVICE_PATH + "/" + dogId);
+        MutableHttpRequest<Object> request = HttpRequest.DELETE(SERVICE_PATH + "/" + dogId)
+                .header("Authorization", bearerAuth(TEST_EMAIL, List.of("ROLE_USER")));
+
         HttpClientResponseException exception = assertThrows(HttpClientResponseException.class, () -> {
             client.toBlocking().exchange(request, Argument.VOID);
         });
@@ -187,13 +212,30 @@ class DogControllerIntegrationTest extends IntegrationTestBase {
     @Test
     void testGetDog_returnsNotFound() {
         UUID dogId = UUID.randomUUID();
+
         when(dogDao.findById(any())).thenReturn(Optional.empty());
 
-        MutableHttpRequest<Object> request = HttpRequest.GET(SERVICE_PATH + "/" + dogId);
+        MutableHttpRequest<Object> request = HttpRequest.GET(SERVICE_PATH + "/" + dogId)
+                .header("Authorization", bearerAuth(TEST_EMAIL, List.of("ROLE_USER")));
+
         HttpClientResponseException exception = assertThrows(HttpClientResponseException.class, () -> {
             client.toBlocking().exchange(request, Argument.of(DogResponse.class));
         });
 
         assertEquals(HttpStatus.NOT_FOUND, exception.getStatus());
+    }
+
+    @Test
+    void testUnauthorizedAccess() {
+        UUID dogId = UUID.randomUUID();
+
+        // No auth header
+        MutableHttpRequest<Object> request = HttpRequest.GET(SERVICE_PATH + "/" + dogId);
+
+        HttpClientResponseException exception = assertThrows(HttpClientResponseException.class, () -> {
+            client.toBlocking().exchange(request, Argument.of(DogResponse.class));
+        });
+
+        assertEquals(HttpStatus.UNAUTHORIZED, exception.getStatus());
     }
 }

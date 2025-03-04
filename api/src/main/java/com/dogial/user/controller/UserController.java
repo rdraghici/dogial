@@ -10,7 +10,6 @@ import io.micronaut.security.rules.SecurityRule;
 
 import java.util.UUID;
 
-@Secured(SecurityRule.IS_ANONYMOUS)
 @Controller("/v1/users")
 public class UserController {
 
@@ -20,22 +19,26 @@ public class UserController {
         this.userService = userService;
     }
 
+    @Secured(SecurityRule.IS_ANONYMOUS)
     @Post
     public HttpResponse<UserResponse> createUser(@Body UserRequest userRequest) {
         return userService.createUser(userRequest);
     }
 
+    @Secured(SecurityRule.IS_AUTHENTICATED)
     @Put("/{id}")
     @Patch("/{id}")
     public HttpResponse<UserResponse> updateUser(@PathVariable UUID id, @Body UserRequest userRequest) {
         return userService.updateUser(id, userRequest);
     }
 
+    @Secured(SecurityRule.IS_AUTHENTICATED)
     @Delete("/{id}")
     public HttpResponse<Void> deleteUser(@PathVariable UUID id) {
         return userService.deleteUser(id);
     }
 
+    @Secured(SecurityRule.IS_AUTHENTICATED)
     @Get("/{id}")
     public HttpResponse<UserResponse> getUser(@PathVariable UUID id) {
         return userService.getUser(id);

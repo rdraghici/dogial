@@ -19,6 +19,7 @@ import jakarta.inject.Inject;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -91,7 +92,10 @@ class UserControllerIntegrationTest extends IntegrationTestBase {
         when(userDao.findById(any())).thenReturn(Optional.of(userEntity));
         when(userDao.update(any())).thenReturn(userEntity);
 
-        MutableHttpRequest<UserRequest> request = HttpRequest.PUT(SERVICE_PATH + "/" + userId, userRequest);
+        // Add authentication
+        MutableHttpRequest<UserRequest> request = HttpRequest.PUT(SERVICE_PATH + "/" + userId, userRequest)
+                .header("Authorization", bearerAuth(TEST_EMAIL, List.of("ROLE_USER")));
+
         HttpResponse<UserResponse> response = client.toBlocking().exchange(request, Argument.of(UserResponse.class));
 
         assertNotNull(response);
@@ -101,12 +105,29 @@ class UserControllerIntegrationTest extends IntegrationTestBase {
     }
 
     @Test
+    void testUpdateUser_unauthorized() {
+        UUID userId = UUID.randomUUID();
+        UserRequest userRequest = new UserRequest("updated@example.com", "newPasswordHash");
+
+        // No auth header
+        MutableHttpRequest<UserRequest> request = HttpRequest.PUT(SERVICE_PATH + "/" + userId, userRequest);
+
+        HttpClientResponseException exception = assertThrows(HttpClientResponseException.class, () -> {
+            client.toBlocking().exchange(request, Argument.of(UserResponse.class));
+        });
+
+        assertEquals(HttpStatus.UNAUTHORIZED, exception.getStatus());
+    }
+
+    @Test
     void testUpdateUser_returnsNotFound() {
         UUID userId = UUID.randomUUID();
         UserRequest userRequest = new UserRequest("updated@example.com", "newPasswordHash");
         when(userDao.findById(any())).thenReturn(Optional.empty());
 
-        MutableHttpRequest<UserRequest> request = HttpRequest.PUT(SERVICE_PATH + "/" + userId, userRequest);
+        MutableHttpRequest<UserRequest> request = HttpRequest.PUT(SERVICE_PATH + "/" + userId, userRequest)
+                .header("Authorization", bearerAuth(TEST_EMAIL, List.of("ROLE_USER")));
+
         HttpClientResponseException exception = assertThrows(HttpClientResponseException.class, () -> {
             client.toBlocking().exchange(request, Argument.of(UserResponse.class));
         });
@@ -121,7 +142,9 @@ class UserControllerIntegrationTest extends IntegrationTestBase {
         when(userDao.findById(any())).thenReturn(Optional.of(userEntity));
         doNothing().when(userDao).delete(any());
 
-        MutableHttpRequest<Object> request = HttpRequest.DELETE(SERVICE_PATH + "/" + userId);
+        MutableHttpRequest<Object> request = HttpRequest.DELETE(SERVICE_PATH + "/" + userId)
+                .header("Authorization", bearerAuth(TEST_EMAIL, List.of("ROLE_USER")));
+
         HttpResponse<Void> response = client.toBlocking().exchange(request, Argument.VOID);
 
         assertNotNull(response);
@@ -133,7 +156,9 @@ class UserControllerIntegrationTest extends IntegrationTestBase {
         UUID userId = UUID.randomUUID();
         when(userDao.findById(any())).thenReturn(Optional.empty());
 
-        MutableHttpRequest<Object> request = HttpRequest.DELETE(SERVICE_PATH + "/" + userId);
+        MutableHttpRequest<Object> request = HttpRequest.DELETE(SERVICE_PATH + "/" + userId)
+                .header("Authorization", bearerAuth(TEST_EMAIL, List.of("ROLE_USER")));
+
         HttpClientResponseException exception = assertThrows(HttpClientResponseException.class, () -> {
             client.toBlocking().exchange(request, Argument.VOID);
         });
@@ -151,7 +176,9 @@ class UserControllerIntegrationTest extends IntegrationTestBase {
                 .build();
         when(userDao.findById(any())).thenReturn(Optional.of(userEntity));
 
-        MutableHttpRequest<Object> request = HttpRequest.GET(SERVICE_PATH + "/" + userId);
+        MutableHttpRequest<Object> request = HttpRequest.GET(SERVICE_PATH + "/" + userId)
+                .header("Authorization", bearerAuth(TEST_EMAIL, List.of("ROLE_USER")));
+
         HttpResponse<UserResponse> response = client.toBlocking().exchange(request, Argument.of(UserResponse.class));
 
         assertNotNull(response);
@@ -165,7 +192,9 @@ class UserControllerIntegrationTest extends IntegrationTestBase {
         UUID userId = UUID.randomUUID();
         when(userDao.findById(any())).thenReturn(Optional.empty());
 
-        MutableHttpRequest<Object> request = HttpRequest.GET(SERVICE_PATH + "/" + userId);
+        MutableHttpRequest<Object> request = HttpRequest.GET(SERVICE_PATH + "/" + userId)
+                .header("Authorization", bearerAuth(TEST_EMAIL, List.of("ROLE_USER")));
+
         HttpClientResponseException exception = assertThrows(HttpClientResponseException.class, () -> {
             client.toBlocking().exchange(request, Argument.of(UserResponse.class));
         });

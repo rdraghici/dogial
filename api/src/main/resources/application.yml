@@ -1,10 +1,34 @@
 micronaut:
+
   application:
     name: dogial
+
   server:
     port: 8080
+
   security:
-    enabled: false
+    authentication: bearer
+    token:
+      jwt:
+        signatures:
+          secret:
+            generator:
+              secret: "${JWT_SECRET:thisIsAMockedDogialsecret01234567890ABCDEFGHIJKLMNO-PQRST}"
+        generator:
+          refresh-token:
+            secret: "${JWT_REFRESH_SECRET:thisIsAMockedDogialRefreshsecret01234567890ABCDEFGHIJKLMNO-PQRST}"
+          access-token:
+            expiration: 3600  # 1 hour
+
+    intercept-url-map:
+      - pattern: /authentication/**
+        http-method: POST
+        access:
+          - isAnonymous()
+      - pattern: /v1/users
+        http-method: POST
+        access:
+          - isAnonymous()
 
 datasources:
   default:
@@ -29,6 +53,7 @@ jpa:
         current_session_context_class: jta
 
 flyway:
+
   enabled: true
   datasources:
     default:

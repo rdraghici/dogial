@@ -79,9 +79,16 @@ dependencies {
 
     // Micronaut HTTP client
     implementation("io.micronaut:micronaut-http-client")
+
+    // Authentication dependencies
+    implementation("io.micronaut.security:micronaut-security-jwt")
+    implementation("io.micronaut.security:micronaut-security-annotations")
+
+    //Reactor
+    implementation("io.projectreactor:reactor-core:3.5.11")
 }
 
-configurations.all {
+configurations.configureEach {
     exclude group: 'org.flywaydb', module: 'flyway-mysql'
 }
 

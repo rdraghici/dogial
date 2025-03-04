@@ -1,15 +1,16 @@
 package com.dogial.user.service;
 
+import com.dogial.authentication.service.PasswordEncoder;
 import com.dogial.user.controller.model.UserRequest;
 import com.dogial.user.controller.model.UserResponse;
 import com.dogial.user.mapper.UserMapper;
 import com.dogial.user.persistence.dao.UserDao;
 import com.dogial.user.persistence.entities.UserEntity;
-import com.dogial.user.service.exception.UserServiceException;
 import io.micronaut.http.HttpResponse;
 
 import io.micronaut.http.HttpStatus;
 import io.micronaut.http.exceptions.HttpStatusException;
+import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
@@ -24,10 +25,13 @@ public class UserService {
 
     private final UserDao userDao;
     private final UserMapper userMapper;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserService(UserDao userDao) {
+    @Inject
+    public UserService(UserDao userDao, PasswordEncoder passwordEncoder) {
         this.userDao = userDao;
         this.userMapper = UserMapper.INSTANCE;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Transactional
@@ -37,6 +41,10 @@ public class UserService {
             throw new HttpStatusException(HttpStatus.BAD_REQUEST, "User already exists");
         }
         UserEntity userEntity = userMapper.toEntity(userRequest);
+
+        // Hash the password before saving
+        userEntity.setPasswordHash(passwordEncoder.encode(userRequest.passwordHash()));
+
         UserEntity savedUser = userDao.save(userEntity);
         UserResponse userResponse = userMapper.toResponse(savedUser);
         return HttpResponse.created(userResponse);

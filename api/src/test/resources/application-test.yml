@@ -3,6 +3,17 @@ micronaut:
     name: dogial-api-test
   server:
     port: -1  # Random port for tests
+  security:
+    enabled: true
+    token:
+      jwt:
+        signatures:
+          secret:
+            generator:
+              secret: "thisIsAMockedDogialsecret01234567890ABCDEFGHIJKLMNO-PQRST"
+        generator:
+          access-token:
+            expiration: 3600
 
 datasources:
   default:

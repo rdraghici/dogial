@@ -1,4 +1,4 @@
-package com.dogial;
+package com.dogial.utils;
 
 import io.micronaut.http.HttpStatus;
 import io.micronaut.http.exceptions.HttpStatusException;
